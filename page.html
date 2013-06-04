@@ -16,8 +16,8 @@
 
         <style type="text/css">
             .runButton {
-                height: 55px;
-                width: 70px;
+                height: 70px;
+                width: 100px;
                 margin-right: 10px;
             }
 
@@ -33,7 +33,10 @@
         <script type="text/javascript">
             var socket;
             var user;
-            window.onload = function() {
+
+            var raceStarted = false;
+
+            var socketInitialization = function(username){
                 var welcome = document.getElementById("welcome");
                 var allUsers = $("#users");
                 var progress = document.getElementById("progress");
@@ -41,23 +44,29 @@
 
                 socket = io.connect('http://'+window.location.hostname+':3250');
 
-                socket.emit("userEnters", "");
+                socket.emit("userEnters", { 'username' : username });
 
                 socket.on("userAccepted", function(data){
                     user = data;
                 });
 
-                socket.on('users', function (data) {
+                socket.on('updateUsers', function (data) {
                     for (var i=0; i < data.users.length; i++){
                         var userHomer = $("#user"+data.users[i].id);
                         if (userHomer.length > 0){
-                            // userHomer.animate({
-                            //     "margin-left": data.users[i].clicks
-                            // });
-                            userHomer.css("margin-left", data.users[i].clicks);
+                            userHomer.animate({
+                                "margin-left": data.users[i].clicks
+                            }, 50);
                         }else{
-                            allUsers.append('<div class="row-fluid userTrack"><div class="span12"><button class="btn btn-success runButton" onclick="sendClick();">Run Homer!</button><img id="user'+data.users[i].id+'" src="./img/run_homer_run.png" style="height:100px;"/></div></div><hr/>');
+                            allUsers.append('<div class="row-fluid userTrack" id="userContent'+data.users[i].id+'"><div class="span12"><button class="btn btn-success runButton" onclick="sendClick();">Run '+data.users[i].name+'!</button><div style="display:inline-block; width:286px;"><img id="user'+data.users[i].id+'" src="./img/run_homer_run.png" style="height:100px;"/></div><img src="./img/donut.jpg" style="height:100px;"></div></div><hr/>');
                         }
+                    }
+                });
+
+                socket.on("removeUser", function(user) {
+                    var userContent = $("#userContent"+user.id);
+                    if (userContent.length > 0){
+                        userContent.remove();
                     }
                 });
 
@@ -67,13 +76,31 @@
                 });
 
                 socket.on('win', function (data) {
-                    results.innerHTML = data.message;
+                    raceStarted = false;
+                    $("#winnerUsername").text(data.user.name);
+                    $("#userWinModal").modal({
+                        backdrop : 'static',
+                        keyboard : false
+                    });
                 });
 
+                socket.on('raceStarted', function(data){
+                    var semaforoModal = $("#semaforoModal");
+                    semaforoModal.modal({
+                        backdrop : 'static',
+                        keyboard : false
+                    });
+
+                    setTimeout(function(){
+                        semaforoModal.modal('hide');
+                        raceStarted = true;
+                    }, 5000);
+                });
             };
 
-            function sendClick(){
-                socket.emit("click", user);
+            var sendClick = function(){
+                if (raceStarted)
+                    socket.emit("click", user);
             };
 
             $(function(){
@@ -83,26 +110,52 @@
                 });
 
                 $("#usernameForm").submit(function(){
+                    var usernameInput = $("#usernameInput");
+                    socketInitialization(usernameInput.val());
                     $("#usernameFormModal").modal("hide");
                     // Stop the normal action
                     return false;
                 });
             });
+
+            var startRace = function(){
+                socket.emit('startRace');
+            };
+
+            var restartRace = function(){
+                socket.emit('restartRace');
+            };
         </script>
     </head>
 
     <body class="main">
 
+        <div id="semaforoModal" class="modal hide fade">
+            <div class="modal-body">
+                Se larga en 5... 4... 3... 2... 1...
+            </div>
+        </div>
+
+        <div id="userWinModal" class="modal hide fade">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h1>User <span id="winnerUsername"></span> rocks!</h1>
+            </div>
+            <div style="text-align:center;" class="modal-body">
+                <img style="height:300px;" src="./img/homer-woohoo-big.jpg">
+            </div>
+        </div>
+
         <div id="usernameFormModal" class="modal hide fade">
             <div class="modal-header">
-                <h3>Welcome to Socket Baloons Game!</h3>
+                <h3>Welcome to Sockets Game!</h3>
             </div>
 
             <div class="modal-body">
                 <form id="usernameForm">
                     <fieldset>
                         <label>Nickname</label>
-                        <input type="text" placeholder="Enter a great nickname…" required>
+                        <input type="text" id="usernameInput" placeholder="Enter a great nickname…" required>
                     </fieldset>
                 </form>
             </div>
@@ -116,6 +169,8 @@
             <div class="row-fluid">
                 <div class="span12 well">
                     <h1>Welcome to SocketsGame!</h1>
+                    <button onclick="startRace();" class="btn btn-primary">Start Race!</button>
+                    <button onclick="restartRace();" class="btn btn btn-danger">Restart Race!</button>
                 </div>
             </div>
         </div>

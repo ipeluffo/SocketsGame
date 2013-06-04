@@ -59,30 +59,53 @@ io.sockets.on('connection', function(socket){
         socket.emit("userAccepted", user);
     });
 
-    socket.on('disconnect', function() {
-        removeUser(user);
-    });
-
-    socket.on("click", function(user){
-        users[user.id].clicks += 4;
-        if (user.clicks == winWidth){
-            io.sockets.emit("win", { message: user.name + " rocks!" });
+    socket.on("click", function(){
+        user.clicks += 4;
+        if (user.clicks >= winWidth){
+            io.sockets.emit("win", { "user" : user });
         }
 
         updateUsers();
     });
+
+    socket.on('disconnect', function() {
+        removeUser(user);
+    });
+
+    socket.on('startRace', function() {
+        if (!raceStarted){
+            io.sockets.emit("raceStarted");
+            raceStarted = true;
+        }
+    });
+
+    socket.on('restartRace', function(){
+        raceStarted = false;
+        cleanUsers();
+        updateUsers();
+    });
+
 });
 
-var winWidth = 150;
+var raceStarted = false;
+
+var winWidth = 200;
 var users = [];
+var globalId = 0;
+
+var cleanUsers = function(){
+    for (var i = 0; i < users.length; i++){
+        users[i].clicks = 0;
+    }
+};
 
 var addUser = function(username){
     var user = {
-        id: users.length,
+        id: globalId,
         name : username || Moniker.choose(),
         clicks: 0
     };
-
+    globalId += 1;
     users.push(user);
     updateUsers();
     return user;
@@ -92,13 +115,18 @@ var removeUser = function(user){
     for (var i = 0; i < users.length; i++){
         if (user.name === users[i].name){
             users.splice(i, 1);
-            updateUsers();
+
+            if (users.length === 0){
+                raceStarted = false;
+            }
+
+            io.sockets.emit("removeUser", user);
             return;
         }
     }
 };
 
 var updateUsers = function(){
-    io.sockets.emit("users", { users : users });
+    io.sockets.emit("updateUsers", { users : users });
 };
 
