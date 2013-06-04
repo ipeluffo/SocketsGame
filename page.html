@@ -22,7 +22,7 @@
             var user;
             window.onload = function() {
                 var welcome = document.getElementById("welcome");
-                var allUsers = document.getElementById("users");
+                var allUsers = $("#users");
                 var progress = document.getElementById("progress");
                 var results = document.getElementById("results");
 
@@ -40,7 +40,8 @@
                         if (userContent){
                             userContent.innerHTML = data.users[i].clicks;
                         }else{
-                            allUsers.innerHTML += "<div><span id='user"+data.users[i].id+"'>"+data.users[i].clicks+"</span><br/><button onclick='sendClick();'>boton</button></div>"
+                            //allUsers.append("<div><button onclick='sendClick();'>boton</button><span id='user"+data.users[i].id+"'>"+data.users[i].clicks+"</span></div>");
+                            allUsers.append('<div><button onclick="sendClick();">boton</button><div class="progress progress-striped active"><div class="bar" style="width: 40%;"></div></div></div>');
                         }
                     }
                 });
@@ -65,22 +66,30 @@
                     backdrop: 'static',
                     keyboard: false
                 });
+
+                $("#usernameForm").submit(function(){
+                    $("#usernameFormModal").modal("hide");
+
+                    // Stop the normal action
+                    return false;
+                });
             });
         </script>
     </head>
 
     <body class="main">
+
         <div id="usernameFormModal" class="modal hide fade">
             <div class="modal-header">
                 <h3>Welcome to Socket Baloons Game!</h3>
             </div>
 
             <div class="modal-body">
-                <form>
+                <form id="usernameForm">
                     <fieldset>
                         <label>Nickname</label>
                         <input type="text" placeholder="Enter a great nickname…">
-                        <button type="submit" class="btn" data-dismiss="modal">Play!</button>
+                        <button type="submit" class="btn">Play!</button>
                     </fieldset>
                 </form>
             </div>
