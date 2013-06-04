@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+    <head>        
+        <title>Socket Baloons Game!</title>
+        <meta charset='utf-8'> 
+        <style type="text/css">
+            
+        </style>
+
+        <!-- Bootstrap dependencies -->
+        <link rel="stylesheet" type="text/css" href="./css/bootstrap.css">
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+        <script type="text/javascript" src="./js/bootstrap.js"></script>
+        <!-- ********************** -->
+
+        <!-- Socket dependencies -->
+        <script src="/socket.io/socket.io.js"></script>
+        <!-- ******************* -->
+
+        <script type="text/javascript">
+            var socket;
+            var user;
+            window.onload = function() {
+                var welcome = document.getElementById("welcome");
+                var allUsers = document.getElementById("users");
+                var progress = document.getElementById("progress");
+                var results = document.getElementById("results");
+
+                socket = io.connect('http://'+window.location.hostname+':3250');
+
+                socket.emit("userEnters", "");
+
+                socket.on("userAccepted", function(data){
+                    user = data;
+                });
+
+                socket.on('users', function (data) {
+                    for (var i=0; i < data.users.length; i++){
+                        var userContent = document.getElementById("user"+data.users[i].id);
+                        if (userContent){
+                            userContent.innerHTML = data.users[i].clicks;
+                        }else{
+                            allUsers.innerHTML += "<div><span id='user"+data.users[i].id+"'>"+data.users[i].clicks+"</span><br/><button onclick='sendClick();'>boton</button></div>"
+                        }
+                    }
+                });
+
+                socket.on('update', function (data) {
+                    progress.innerHTML = data.currentWidth;
+                    progress.style.width = parseInt(data.currentWidth) + "px";
+                });
+
+                socket.on('win', function (data) {
+                    results.innerHTML = data.message;
+                });
+
+            };
+
+            function sendClick(){
+                socket.emit("click", user);
+            };
+
+            $(function(){
+                $('#usernameFormModal').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
+            });
+        </script>
+    </head>
+
+    <body class="main">
+        <div id="usernameFormModal" class="modal hide fade">
+            <div class="modal-header">
+                <h3>Welcome to Socket Baloons Game!</h3>
+            </div>
+
+            <div class="modal-body">
+                <form>
+                    <fieldset>
+                        <label>Nickname</label>
+                        <input type="text" placeholder="Enter a great nickname…">
+                        <button type="submit" class="btn" data-dismiss="modal">Play!</button>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+
+        <div id="welcome"></div>
+        <hr />
+        <div id="progress"></div>
+        <div id="win">150</div>
+        <hr />
+        <div id="users"></div>
+        <hr />
+        <div id="results"></div>
+    </body>
+</html>
+

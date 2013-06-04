@@ -1,0 +1,10 @@
+{
+	"name" : "SocketsGame",
+	"version" : "0.0.1",
+	"description" : "SocketsGame",
+	"dependencies" : {
+		"socket.io" : "latest",
+		"moniker": "latest"
+	},
+	"author" : "Ignacio Peluffo"
+}
