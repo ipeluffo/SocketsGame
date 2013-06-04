@@ -1,5 +1,15 @@
 var handler = function(req, res) {
 
+    if (req.url.indexOf('.jpg') > -1 || req.url.indexOf('.png') > -1){
+        fs.readFile(__dirname + req.url, function (err, data){
+            
+            if (err) console.log("Error loading IMG file: " + err);
+            
+            res.writeHead(200, { 'Content-Type' : 'image/jpg' });
+            res.end(data, 'binary');
+        });
+    }
+
 	if (req.url.indexOf('.css') > -1){
 		fs.readFile(__dirname + req.url, function (err, data){
 			
@@ -31,7 +41,6 @@ var handler = function(req, res) {
     
 };
 
-//var app = require('http').createServer(handler);
 var app = require('http').createServer(handler);
 var io = require('socket.io').listen(app);
 var fs = require('fs');
@@ -55,7 +64,7 @@ io.sockets.on('connection', function(socket){
     });
 
     socket.on("click", function(user){
-        users[user.id].clicks += 1;
+        users[user.id].clicks += 4;
         if (user.clicks == winWidth){
             io.sockets.emit("win", { message: user.name + " rocks!" });
         }

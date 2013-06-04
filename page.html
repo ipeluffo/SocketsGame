@@ -1,11 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>        
-        <title>Socket Baloons Game!</title>
+        <title>Sockets Game!</title>
         <meta charset='utf-8'> 
-        <style type="text/css">
-            
-        </style>
 
         <!-- Bootstrap dependencies -->
         <link rel="stylesheet" type="text/css" href="./css/bootstrap.css">
@@ -16,6 +13,22 @@
         <!-- Socket dependencies -->
         <script src="/socket.io/socket.io.js"></script>
         <!-- ******************* -->
+
+        <style type="text/css">
+            .runButton {
+                height: 55px;
+                width: 70px;
+                margin-right: 10px;
+            }
+
+            .container {
+                width: 900px;
+            }
+
+            .userTrack {
+                margin-bottom: 10px;
+            }
+        </style>
 
         <script type="text/javascript">
             var socket;
@@ -36,12 +49,14 @@
 
                 socket.on('users', function (data) {
                     for (var i=0; i < data.users.length; i++){
-                        var userContent = document.getElementById("user"+data.users[i].id);
-                        if (userContent){
-                            userContent.innerHTML = data.users[i].clicks;
+                        var userHomer = $("#user"+data.users[i].id);
+                        if (userHomer.length > 0){
+                            // userHomer.animate({
+                            //     "margin-left": data.users[i].clicks
+                            // });
+                            userHomer.css("margin-left", data.users[i].clicks);
                         }else{
-                            //allUsers.append("<div><button onclick='sendClick();'>boton</button><span id='user"+data.users[i].id+"'>"+data.users[i].clicks+"</span></div>");
-                            allUsers.append('<div><button onclick="sendClick();">boton</button><div class="progress progress-striped active"><div class="bar" style="width: 40%;"></div></div></div>');
+                            allUsers.append('<div class="row-fluid userTrack"><div class="span12"><button class="btn btn-success runButton" onclick="sendClick();">Run Homer!</button><img id="user'+data.users[i].id+'" src="./img/run_homer_run.png" style="height:100px;"/></div></div><hr/>');
                         }
                     }
                 });
@@ -69,7 +84,6 @@
 
                 $("#usernameForm").submit(function(){
                     $("#usernameFormModal").modal("hide");
-
                     // Stop the normal action
                     return false;
                 });
@@ -88,21 +102,27 @@
                 <form id="usernameForm">
                     <fieldset>
                         <label>Nickname</label>
-                        <input type="text" placeholder="Enter a great nickname…">
-                        <button type="submit" class="btn">Play!</button>
+                        <input type="text" placeholder="Enter a great nickname…" required>
                     </fieldset>
                 </form>
             </div>
+
+            <div class="modal-footer">
+                <button onclick="$('#usernameForm').submit();" type="submit" class="btn">Play!</button>
+            </div>
         </div>
 
-        <div id="welcome"></div>
-        <hr />
-        <div id="progress"></div>
-        <div id="win">150</div>
-        <hr />
-        <div id="users"></div>
-        <hr />
-        <div id="results"></div>
+        <div class="container">
+            <div class="row-fluid">
+                <div class="span12 well">
+                    <h1>Welcome to SocketsGame!</h1>
+                </div>
+            </div>
+        </div>
+
+        <div id="users" class="container">
+        </div>
+
     </body>
 </html>
 
