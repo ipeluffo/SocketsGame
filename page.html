@@ -58,7 +58,7 @@
                                 "margin-left": data.users[i].clicks
                             }, 50);
                         }else{
-                            allUsers.append('<div class="row-fluid userTrack" id="userContent'+data.users[i].id+'"><div class="span12"><button class="btn btn-success runButton" onclick="sendClick();">Run '+data.users[i].name+'!</button><div style="display:inline-block; width:286px;"><img id="user'+data.users[i].id+'" src="./img/run_homer_run.png" style="height:100px;"/></div><img src="./img/donut.jpg" style="height:100px;"></div></div><hr/>');
+                            allUsers.append('<div class="row-fluid userTrack" id="userContent'+data.users[i].id+'"><div class="span12"><button class="btn btn-success runButton" onclick="sendClick();">Run '+data.users[i].name+'!</button><div style="display:inline-block; width:286px;"><img id="user'+data.users[i].id+'" src="./img/run_homer_run.png" style="height:100px;"/></div><img src="./img/donut.jpg" style="height:100px;"></div><hr/></div>');
                         }
                     }
                 });
@@ -85,16 +85,20 @@
                 });
 
                 socket.on('raceStarted', function(data){
-                    var semaforoModal = $("#semaforoModal");
-                    semaforoModal.modal({
+                    var raceCountModal = $("#raceCountModal");
+                    raceCountModal.modal({
                         backdrop : 'static',
                         keyboard : false
                     });
 
                     setTimeout(function(){
-                        semaforoModal.modal('hide');
+                        raceCountModal.modal('hide');
                         raceStarted = true;
                     }, 5000);
+                });
+
+                socket.on('raceRestarted', function(){
+                    raceStarted = false;
                 });
             };
 
@@ -130,9 +134,9 @@
 
     <body class="main">
 
-        <div id="semaforoModal" class="modal hide fade">
+        <div id="raceCountModal" class="modal hide fade">
             <div class="modal-body">
-                Se larga en 5... 4... 3... 2... 1...
+                La carrera empieza en 5... 4... 3... 2... 1...
             </div>
         </div>
 

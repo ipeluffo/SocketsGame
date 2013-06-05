@@ -61,7 +61,7 @@ io.sockets.on('connection', function(socket){
 
     socket.on("click", function(){
         user.clicks += 4;
-        if (user.clicks >= winWidth){
+        if (user.clicks >= winCount){
             io.sockets.emit("win", { "user" : user });
         }
 
@@ -81,6 +81,7 @@ io.sockets.on('connection', function(socket){
 
     socket.on('restartRace', function(){
         raceStarted = false;
+        io.sockets.emit("raceRestarted");
         cleanUsers();
         updateUsers();
     });
@@ -88,8 +89,7 @@ io.sockets.on('connection', function(socket){
 });
 
 var raceStarted = false;
-
-var winWidth = 200;
+var winCount = 200;
 var users = [];
 var globalId = 0;
 
