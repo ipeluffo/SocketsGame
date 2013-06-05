@@ -58,7 +58,13 @@
                                 "margin-left": data.users[i].clicks
                             }, 50);
                         }else{
-                            allUsers.append('<div class="row-fluid userTrack" id="userContent'+data.users[i].id+'"><div class="span12"><button class="btn btn-success runButton" onclick="sendClick();">Run '+data.users[i].name+'!</button><div style="display:inline-block; width:286px;"><img id="user'+data.users[i].id+'" src="./img/run_homer_run.png" style="height:100px;"/></div><img src="./img/donut.jpg" style="height:100px;"></div><hr/></div>');
+                            // allUsers.append('<div class="row-fluid userTrack" id="userContent'+data.users[i].id+'"><div class="span12"><button class="btn btn-success runButton" onclick="sendClick();">Run '+data.users[i].name+'!</button><div style="display:inline-block; width:286px;"><img id="user'+data.users[i].id+'" src="./img/run_homer_run.png" style="height:100px;"/></div><img src="./img/donut.jpg" style="height:100px;"><hr/></div></div>');
+
+                            // With Label
+                            //allUsers.append('<div class="row-fluid userTrack" id="userContent'+data.users[i].id+'"><div class="span12"><span class="label label-success">'+data.users[i].name+'</span><div style="display:inline-block; width:286px;"><img id="user'+data.users[i].id+'" src="./img/run_homer_run.png" style="height:100px;"/></div><img src="./img/donut.jpg" style="height:100px;"><hr/></div></div>');
+
+                            // For table
+                            allUsers.append('<tr id="userContent'+data.users[i].id+'"><td><span class="label label-success">'+data.users[i].name+'</span></td><td><div style="display:inline-block; width:286px;"><img id="user'+data.users[i].id+'" src="./img/run_homer_run.png" style="height:100px;"/></div><img src="./img/donut.jpg" style="height:100px;"></td></tr>');
                         }
                     }
                 });
@@ -85,21 +91,34 @@
                 });
 
                 socket.on('raceStarted', function(data){
-                    var raceCountModal = $("#raceCountModal");
-                    raceCountModal.modal({
-                        backdrop : 'static',
-                        keyboard : false
-                    });
-
-                    setTimeout(function(){
-                        raceCountModal.modal('hide');
-                        raceStarted = true;
-                    }, 5000);
+                    showRaceCountModal();
                 });
 
                 socket.on('raceRestarted', function(){
                     raceStarted = false;
                 });
+            };
+
+            var showRaceCountModal = function(){
+                var raceCountModal = $("#raceCountModal");
+                    raceCountModal.modal({
+                        backdrop : 'static',
+                        keyboard : false
+                    });
+
+                var i = 5;
+                timer = setInterval(function(){
+                    if (i>0){
+                        $("#raceCount").text(i+"");
+                        i = i-1; 
+                    }else{
+                        clearInterval(timer);
+                        $("#raceCount").text("Go go go!");
+                        raceCountModal.modal('hide');
+                        raceStarted = true;
+
+                    }
+                },1000);
             };
 
             var sendClick = function(){
@@ -129,6 +148,7 @@
             var restartRace = function(){
                 socket.emit('restartRace');
             };
+
         </script>
     </head>
 
@@ -136,7 +156,7 @@
 
         <div id="raceCountModal" class="modal hide fade">
             <div class="modal-body">
-                La carrera empieza en 5... 4... 3... 2... 1...
+                <h3>La carrera empieza en <span id="raceCount"></span></h3>
             </div>
         </div>
 
@@ -167,20 +187,41 @@
             <div class="modal-footer">
                 <button onclick="$('#usernameForm').submit();" type="submit" class="btn">Play!</button>
             </div>
-        </div>
+        </div>        
 
         <div class="container">
             <div class="row-fluid">
-                <div class="span12 well">
-                    <h1>Welcome to SocketsGame!</h1>
-                    <button onclick="startRace();" class="btn btn-primary">Start Race!</button>
-                    <button onclick="restartRace();" class="btn btn btn-danger">Restart Race!</button>
+                <div class="span12 hero-unit well">
+                    <h2>Welcome to SocketsGame!</h2>
+                    <p>
+                        Presiona las teclas para hacer correr a Homero
+                    </p>
+                    <p>
+                        <button onclick="startRace();" class="btn btn-primary">Start Race!</button>
+                        <button onclick="restartRace();" class="btn btn btn-danger">Restart Race!</button>
+                    </p>
+                </div>
+            </div>
+
+            <div class="row-fluid">
+                <div style="padding-top: 4px; padding-bottom: 4px;" class="span3 well well-small">
+                    <h4>Tecla: <span></span></h4>
+                </div>
+            </div>
+
+            <div class="row-fluid">
+                <div class="span12">
+                    <table class="table table-bordered">
+                        <tbody id="users">
+
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
-        <div id="users" class="container">
-        </div>
+        <!-- <div id="users" class="container">
+        </div> -->
 
     </body>
 </html>
