@@ -64,7 +64,7 @@
                             //allUsers.append('<div class="row-fluid userTrack" id="userContent'+data.users[i].id+'"><div class="span12"><span class="label label-success">'+data.users[i].name+'</span><div style="display:inline-block; width:286px;"><img id="user'+data.users[i].id+'" src="./img/run_homer_run.png" style="height:100px;"/></div><img src="./img/donut.jpg" style="height:100px;"><hr/></div></div>');
 
                             // For table
-                            allUsers.append('<tr id="userContent'+data.users[i].id+'"><td><span class="label label-success">'+data.users[i].name+'</span></td><td><div style="display:inline-block; width:286px;"><img id="user'+data.users[i].id+'" src="./img/run_homer_run.png" style="height:100px;"/></div><img src="./img/donut.jpg" style="height:100px;"></td></tr>');
+                            allUsers.append('<tr id="userContent'+data.users[i].id+'"><td style="vertical-align:middle;"><span class="label label-success">'+data.users[i].name+'</span></td><td><div style="display:inline-block; width:286px;"><img id="user'+data.users[i].id+'" src="./img/run_homer_run.png" style="height:100px;"/></div><img src="./img/donut_transparent.png" style="height:100px; margin-left:-18px;"></td></tr>');
                         }
                     }
                 });
@@ -116,14 +116,33 @@
                         $("#raceCount").text("Go go go!");
                         raceCountModal.modal('hide');
                         raceStarted = true;
-
+                        generateKeyRace();
                     }
                 },1000);
+            };
+
+            var lastKeyRaceGenerated;
+
+            var generateKeyRace = function(){
+                lastKeyRaceGenerated = Math.floor(Math.random() * (122 - 97 + 1)) + 97;
+
+                var keyRace = $("#keyRace");
+                keyRace.fadeOut(40);
+                keyRace.text(String.fromCharCode(lastKeyRaceGenerated));
+                keyRace.fadeIn(40);
             };
 
             var sendClick = function(){
                 if (raceStarted)
                     socket.emit("click", user);
+            };
+
+            var startRace = function(){
+                socket.emit('startRace');
+            };
+
+            var restartRace = function(){
+                socket.emit('restartRace');
             };
 
             $(function(){
@@ -141,13 +160,14 @@
                 });
             });
 
-            var startRace = function(){
-                socket.emit('startRace');
-            };
-
-            var restartRace = function(){
-                socket.emit('restartRace');
-            };
+            $(document).keypress(function (eventObject){
+                if (raceStarted){
+                    if (lastKeyRaceGenerated == eventObject.charCode){
+                        sendClick();
+                        generateKeyRace();                        
+                    }
+                }
+            });
 
         </script>
     </head>
@@ -191,10 +211,10 @@
 
         <div class="container">
             <div class="row-fluid">
-                <div class="span12 hero-unit well">
-                    <h2>Welcome to SocketsGame!</h2>
+                <div class="span12 hero-unit well well-small">
+                    <h2>Bienvenido a Sockets Simpsons Game!</h2>
                     <p>
-                        Presiona las teclas para hacer correr a Homero
+                        Presiona las teclas para hacer correr a Homero!
                     </p>
                     <p>
                         <button onclick="startRace();" class="btn btn-primary">Start Race!</button>
@@ -205,7 +225,7 @@
 
             <div class="row-fluid">
                 <div style="padding-top: 4px; padding-bottom: 4px;" class="span3 well well-small">
-                    <h4>Tecla: <span></span></h4>
+                    <h4>Tecla: <span style="text-transform:uppercase;" id="keyRace"></span></h4>
                 </div>
             </div>
 
