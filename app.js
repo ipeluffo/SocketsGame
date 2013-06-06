@@ -30,7 +30,7 @@ var handler = function(req, res) {
 		});
 	}
 
-	if (req.url.indexOf('.html') > -1){
+	if (req.url == "/" || req.url.indexOf('.html') > -1){
 		fs.readFile('./page.html', function (err, data) {
 			console.log(data);
 	        if(err) throw err;
@@ -57,6 +57,7 @@ io.sockets.on('connection', function(socket){
     socket.on('userEnters', function(data){
         user = addUser(data.username);
         socket.emit("userAccepted", user);
+        updateUsers();
     });
 
     socket.on("click", function(){
@@ -107,7 +108,6 @@ var addUser = function(username){
     };
     globalId += 1;
     users.push(user);
-    updateUsers();
     return user;
 };
 
