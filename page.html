@@ -28,6 +28,18 @@
             .userTrack {
                 margin-bottom: 10px;
             }
+
+            .playersField {
+                width: 100%;
+            }
+
+            .playersField tr {
+                border-bottom: 1px solid lightgray;
+            }
+
+            .playersField tr td {
+                padding-top: 5px;
+            }
         </style>
 
         <script type="text/javascript">
@@ -48,6 +60,7 @@
 
                 socket.on("userAccepted", function(data){
                     user = data;
+                    allUsers.append(buildUserTrack(user));
                 });
 
                 socket.on('updateUsers', function (data) {
@@ -56,15 +69,10 @@
                         if (userHomer.length > 0){
                             userHomer.animate({
                                 "margin-left": data.users[i].clicks
-                            }, 50);
+                            }, 100);
                         }else{
-                            // allUsers.append('<div class="row-fluid userTrack" id="userContent'+data.users[i].id+'"><div class="span12"><button class="btn btn-success runButton" onclick="sendClick();">Run '+data.users[i].name+'!</button><div style="display:inline-block; width:286px;"><img id="user'+data.users[i].id+'" src="./img/run_homer_run.png" style="height:100px;"/></div><img src="./img/donut.jpg" style="height:100px;"><hr/></div></div>');
-
-                            // With Label
-                            //allUsers.append('<div class="row-fluid userTrack" id="userContent'+data.users[i].id+'"><div class="span12"><span class="label label-success">'+data.users[i].name+'</span><div style="display:inline-block; width:286px;"><img id="user'+data.users[i].id+'" src="./img/run_homer_run.png" style="height:100px;"/></div><img src="./img/donut.jpg" style="height:100px;"><hr/></div></div>');
-
                             // For table
-                            allUsers.append('<tr id="userContent'+data.users[i].id+'"><td style="vertical-align:middle;"><span class="label label-success">'+data.users[i].name+'</span></td><td><div style="display:inline-block; width:286px;"><img id="user'+data.users[i].id+'" src="./img/run_homer_run.png" style="height:100px;"/></div><img src="./img/donut_transparent.png" style="height:100px; margin-left:-18px;"></td></tr>');
+                            allUsers.append(buildUserTrack(data.users[i]));
                         }
                     }
                 });
@@ -99,6 +107,10 @@
                 });
             };
 
+            var buildUserTrack = function(user){
+                return '<tr id="userContent'+user.id+'"><td style="vertical-align:middle;"><span class="label label-success">'+user.name+'</span></td><td><div style="display:inline-block; width:273px;"><img id="user'+user.id+'" src="./img/run_homer_run.png" style="height:85px;"/></div><img src="./img/donut_transparent.png" style="height:85px; margin-left:-15px;"></td></tr>';
+            };
+
             var showRaceCountModal = function(){
                 var raceCountModal = $("#raceCountModal");
                     raceCountModal.modal({
@@ -124,6 +136,7 @@
             var lastKeyRaceGenerated;
 
             var generateKeyRace = function(){
+                // Calculate ASCII code for 'a' to 'z'
                 lastKeyRaceGenerated = Math.floor(Math.random() * (122 - 97 + 1)) + 97;
 
                 var keyRace = $("#keyRace");
@@ -131,6 +144,15 @@
                 keyRace.text(String.fromCharCode(lastKeyRaceGenerated));
                 keyRace.fadeIn(40);
             };
+
+            $(document).keypress(function (eventObject){
+                if (raceStarted){
+                    if (lastKeyRaceGenerated == eventObject.charCode){
+                        sendClick();
+                        generateKeyRace();                        
+                    }
+                }
+            });
 
             var sendClick = function(){
                 if (raceStarted)
@@ -160,15 +182,6 @@
                 });
             });
 
-            $(document).keypress(function (eventObject){
-                if (raceStarted){
-                    if (lastKeyRaceGenerated == eventObject.charCode){
-                        sendClick();
-                        generateKeyRace();                        
-                    }
-                }
-            });
-
         </script>
     </head>
 
@@ -183,7 +196,7 @@
         <div id="userWinModal" class="modal hide fade">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h1>User <span id="winnerUsername"></span> rocks!</h1>
+                <h1><span id="winnerUsername"></span> ganó la carrera!</h1>
             </div>
             <div style="text-align:center;" class="modal-body">
                 <img style="height:300px;" src="./img/homer-woohoo-big.jpg">
@@ -192,20 +205,20 @@
 
         <div id="usernameFormModal" class="modal hide fade">
             <div class="modal-header">
-                <h3>Welcome to Sockets Game!</h3>
+                <h3>Bienvenido a Sockets Simpsons Game!</h3>
             </div>
 
             <div class="modal-body">
                 <form id="usernameForm">
                     <fieldset>
-                        <label>Nickname</label>
-                        <input type="text" id="usernameInput" placeholder="Enter a great nickname…" required>
+                        <label>Nick</label>
+                        <input type="text" id="usernameInput" placeholder="Elige un nick original…" required>
                     </fieldset>
                 </form>
             </div>
 
             <div class="modal-footer">
-                <button onclick="$('#usernameForm').submit();" type="submit" class="btn">Play!</button>
+                <button onclick="$('#usernameForm').submit();" type="submit" class="btn">Jugar!</button>
             </div>
         </div>        
 
@@ -214,34 +227,31 @@
                 <div class="span12 hero-unit well well-small">
                     <h2>Bienvenido a Sockets Simpsons Game!</h2>
                     <p>
-                        Presiona las teclas para hacer correr a Homero!
-                    </p>
-                    <p>
-                        <button onclick="startRace();" class="btn btn-primary">Start Race!</button>
-                        <button onclick="restartRace();" class="btn btn btn-danger">Restart Race!</button>
+                        <button onclick="startRace();" class="btn btn-primary">Empezar carrera!</button>
+                        <button onclick="restartRace();" class="btn btn btn-danger">Reiniciar carrera!</button>
                     </p>
                 </div>
             </div>
 
             <div class="row-fluid">
-                <div style="padding-top: 4px; padding-bottom: 4px;" class="span3 well well-small">
+                <div style="padding-top: 4px; padding-bottom: 4px;" class="span2 well well-small">
                     <h4>Tecla: <span style="text-transform:uppercase;" id="keyRace"></span></h4>
+                </div>
+
+                <div style="padding-top: 4px; padding-bottom: 4px;" class="span9 well well-small">
+                    <h5>Presiona la tecla que aparece para hacer correr a Homero</h5>
                 </div>
             </div>
 
             <div class="row-fluid">
                 <div class="span12">
-                    <table class="table table-bordered">
+                    <table class="playersField">
                         <tbody id="users">
-
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
-
-        <!-- <div id="users" class="container">
-        </div> -->
 
     </body>
 </html>
